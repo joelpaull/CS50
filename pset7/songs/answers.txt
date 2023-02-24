@@ -1,0 +1,2 @@
+Use the AVG() in a SQL rule to extract and average the energy, valence and dancability of the 100 songs in the database. Use a further algorithm to give a aura score with can than catagorise their 'moods'
+Would be better to split into genre and also account for genre in calc.

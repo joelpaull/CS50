@@ -1,0 +1,29 @@
+Throughout below determinations;
+    As most steps required in sorting of random50000, this time corresponds to BigO notation.
+    As least steps required in sorting of sorted50000, this time corresponds to omega notation.
+
+sort1 uses: bubble sort
+
+How do you know?:
+    Sort1 recorded time to sort random50000; ~7.5s
+    Sort1 recorded time to sort sorted50000; ~0.5s
+    Bubble sort has BigO notation O(n^2), and omega notation theta(n), as random50000 time is much larger than sorted50000 it is conculded this is bubble sort alogrithm.
+    Other two algorithms are assigned theta notations so both ordered and random times will be similar when using same sort algorithm (not the case here).
+
+sort2 uses: Merge sort
+
+
+How do you know?:
+    Sort2 recorded time to sort random50000; ~0.5s
+    Sort2 recorded time to sort sorted50000; ~0.5s
+    Merge sort is faster than selection sort, but both have theta notations so random and sorted times are similar.
+    Comparing Sort2 times against that of Sort3 (~3.5s) determines Sort2 is faster and therefore can be assigned as merge sort.
+
+
+sort3 uses: Selection sort
+
+How do you know?:
+    Sort3 recorded time to sort random50000; ~3.5s
+    Sort3 recorded time to sort sorted50000; ~3.5s
+    The argument of Sort2 allows for the assiging of this Sort algorithm as selection sort.
+

@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+
+<main class="container py-5 text-center">
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th class="text-start">Symbol</th>
+                <th class="text-start">Name</th>
+                <th class="text-end">Price</th>
+                <th class="text-end">Time</th>
+                <th class="text-end">TOTAL</th>
+            </tr>
+        </thead>
+       <tbody>
+
+        {% for row in stocks %}
+                <tr>
+                    <td class="text-start"> {{row.stock}}</td>
+                    <td class="text-start">{{row.name}}</td>
+                    <td class="text-end">{{row.cost | usd}}</td>
+                    <td class="text-end">{{row.time}}</td>
+                    <td class="text-end">{{(row.cost * row.amount * -1) | usd}}</td>
+                </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        </main>
+{% endblock %}

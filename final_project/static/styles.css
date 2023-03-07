@@ -23,3 +23,10 @@ nav .navbar-brand
 .button:hover{
     background-color:red
   }
+
+/* search_details config */
+
+.search{
+    color : blue;
+    font-size: 25px;
+}

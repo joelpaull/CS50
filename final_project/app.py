@@ -27,6 +27,12 @@ def find_cas(chemical):
     data = response_api.json()
     return(data["results"][0]['rn'])
 
+def time():
+    now = datetime.now()
+    s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+    time = s[:19]
+    return stripped_time
+
     
 @app.route("/")
 def index():
@@ -52,7 +58,10 @@ def search_details():
         # add chemical/ CAS to database
         chemical = request.form.get("chemical")
         cas_number = request.form.get("cas_number")
-        time = datetime.now()
+        # strip decimals from time, (first convert to str)
+        now = datetime.now()
+        s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+        time = s[:16]
         print(chemical)
         
         with sqlite3.connect(db_path) as db:
@@ -62,9 +71,40 @@ def search_details():
     
 @app.route('/cas_database')
 def cas_database():
+    # Show results from database, ordered with most recent at top
     with sqlite3.connect(db_path) as db:
         data = db.execute("SELECT * FROM Chemicals ORDER BY time DESC")
         return render_template("cas_database.html", chemicals = data)
+
+@app.route('/buy', methods=["GET", "POST"])
+def buy():
+    if request.method == "GET":
+        return render_template("buy.html")
+    else:
+        # Add buy orders to database
+        chemical = request.form.get("chemical").title()
+        amount = request.form.get("amount")
+        unit = request.form.get("unit")
+        # strip decimals from time, (first convert to str)
+        now = datetime.now()
+        s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+        time = s[:16]
+        
+        priority = request.form.get("priority").title()
+        with sqlite3.connect(db_path) as db:
+            data = (chemical, amount, unit, time, priority)
+            print(data)
+            db.execute("INSERT INTO orders (chemical, amount, unit, time, priority) VALUES (?, ?, ?, ?, ?)", data)
+        return render_template("buy.html")
+        
+        
+@app.route('/purchase_database')
+def purchase_database():
+    # Show results from database, ordered with most recent at top
+    with sqlite3.connect(db_path) as db:
+        data = db.execute("SELECT * FROM orders ORDER BY time DESC")
+        return render_template("purchase_database.html", orders = data)
+
         
     
     

@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    CAS Data
+{% endblock %}
+
+{% block main %}   
+<main class="container py-5">
+    <table class="table table-striped" id ="purchase_table" name="purchase_table">
+        <thead>
+            <tr>
+                <th class="text-start">Chemical</th>
+                <th class="text-start">Amount</th>
+                <th class="text-end">Order Date</th>
+                <th class="text-end">Priority</th>
+            </tr>
+        </thead>
+       <tbody>
+        {% for row in orders %}
+                <tr>
+                    <td class="text-start"> {{row[0]}}</td>
+                    <td class="text-start">{{row[1]}} {{row[2]}}</td>
+                    <td class="text-end">{{row[3]}}</td>
+                    <td class="text-end">{{row[5]}}</td>
+                </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+        </main>
+{% endblock %}

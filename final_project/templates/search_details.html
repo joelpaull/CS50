@@ -5,10 +5,10 @@
 {% endblock %}
 
 {% block main %}
-    <p class ="search">CAS Number for {{chemical}} : {{cas_number}}<p>
+    <p class ="search_CAS">CAS Number for {{chemical}} : {{cas_number}}<p>
         <div class ="mt-5">
         <form action="/search_details" method="post">
-            <input id='chemical' type= "hidden" name = 'chemical' value = {{chemical}}>
+            <input id='chemical' type= "hidden" name = 'chemical' value = '{{chemical}}'>
             <input id='cas_number' type= "hidden" name = 'cas_number' value = {{cas_number}}>
             <button class="btn button btn-primary mt-3" type="submit">Save CAS</button>
         </form>

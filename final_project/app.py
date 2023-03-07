@@ -1,9 +1,10 @@
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, send_from_directory
 from flask_session import Session
 from pip._vendor import requests
 import sqlite3
 import os.path
 from datetime import datetime
+from find_sds.find_sds import find_sds
 
 URL = "https://commonchemistry.cas.org/api/search?"
 
@@ -19,20 +20,13 @@ db = sqlite3.connect(db_path)
 def find_cas(chemical):
     # Return CAS number from function
     parameters = {
-            'q' : chemical,  
+            'q' : chemical, 
             'size' : '1',
             'offset': '0'}
     response_api = requests.get(url = URL, params = parameters)
     response_api.raise_for_status()
     data = response_api.json()
     return(data["results"][0]['rn'])
-
-def time():
-    now = datetime.now()
-    s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
-    time = s[:19]
-    return stripped_time
-
     
 @app.route("/")
 def index():
@@ -105,8 +99,15 @@ def purchase_database():
         data = db.execute("SELECT * FROM orders ORDER BY time DESC")
         return render_template("purchase_database.html", orders = data)
 
-        
-    
-    
-        
+@app.route('/sds', methods = ["GET", "POST"])
+def sds():
+    if request.method == "GET":
+        return render_template("sds.html")
+    else:
+        filepath = "/Users/joelpaull/cs50/CS50/final_project/find_sds/find_sds/SDS"
+        pool = int(1)
+        cas = request.form.get("cas")
+        find_sds.find_sds([cas])
+        return send_from_directory(filepath, (cas + '-SDS.pdf'))
+
         

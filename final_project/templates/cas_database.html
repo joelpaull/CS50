@@ -49,13 +49,18 @@
             <tr>
                 <th class="text-start">Chemical</th>
                 <th class="text-start">CAS Number</th>
+                
             </tr>
         </thead>
        <tbody>
         {% for chem in chemicals %}
                 <tr>
+                    <form action="/sds" method="post">
                     <td class="text-start"> {{chem[0]}}</td>
                     <td class="text-start">{{chem[1]}}</td>
+                    <input id='cas' type= "hidden" name = 'cas' value = {{chem[1]}}>
+                    <td class="text-start"> <button class ="button_sds_database btn btn-primary" type="submit">Find SDS</button></td>
+                    </form>
                 </tr>
         {% endfor %}
         </tbody>

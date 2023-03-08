@@ -36,6 +36,17 @@ nav .navbar-brand
     background-color:red
   }
 
+  .button_sds_database{
+    background-color:orange;
+    color: white;
+    border: none;
+  }  
+
+  .button_sds_database:hover{
+    background-color:red;
+    color: white;
+  }
+  
 /* search_details config */
 
 .search {

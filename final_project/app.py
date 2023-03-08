@@ -5,6 +5,7 @@ import sqlite3
 import os.path
 from datetime import datetime
 from find_sds.find_sds import find_sds
+from werkzeug.security import check_password_hash, generate_password_hash
 
 URL = "https://commonchemistry.cas.org/api/search?"
 
@@ -98,6 +99,25 @@ def purchase_database():
     with sqlite3.connect(db_path) as db:
         data = db.execute("SELECT * FROM orders ORDER BY time DESC")
         return render_template("purchase_database.html", orders = data)
+    
+@app.route('/purchase', methods = (["GET", "POST"]))
+def purchase():
+    if request.method == "POST":
+        # Get data about purchase from posted form
+        chemical = request.form.getlist("chemical") 
+        amount = request.form.getlist("amount")
+        unit = request.form.getlist("unit")
+        date = request.form.getlist("date")
+        print(chemical, amount, unit, date)
+        # Get current time 
+        now = datetime.now()
+        s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+        time = s[:16]
+        # Add purchase time to database
+        with sqlite3.connect(db_path) as db:
+            db.execute(f"UPDATE orders SET purchase_time = ? WHERE time = '{date[0]}'", (time,))
+            data = db.execute("SELECT * FROM orders ORDER BY time DESC")
+            return render_template("purchase_database.html", orders = data)
 
 @app.route('/sds', methods = ["GET", "POST"])
 def sds():

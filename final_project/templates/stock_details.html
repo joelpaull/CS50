@@ -1,10 +1,14 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Buy Request
+    Stock
 {% endblock %}
 
 {% block main %}
+<div>
+    <p class ="search_CAS">Current stock of {{chemical}}<p>  
+    <p class ="search_CAS_number">{{total}}</p>
+</div>
     <form action="/buy" method="post" class="buy_request justify-content-center justify-axis-center">
         <div class="buy_request justify-content-center justify-axis-center">
             <input autocomplete="off" autofocus class="form-control mx-auto w-auto mt-5" id="chemical" name="chemical" placeholder="Chemical" type="text">

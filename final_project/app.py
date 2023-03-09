@@ -104,10 +104,10 @@ def purchase_database():
 def purchase():
     if request.method == "POST":
         # Get data about purchase from posted form
-        chemical = request.form.getlist("chemical") 
-        amount = request.form.getlist("amount")
-        unit = request.form.getlist("unit")
-        date = request.form.getlist("date")
+        chemical = request.form.get("chemical") 
+        amount = request.form.get("amount")
+        unit = request.form.get("unit")
+        date = request.form.get("date")
         print(chemical, amount, unit, date)
         # Get current time 
         now = datetime.now()
@@ -115,7 +115,9 @@ def purchase():
         time = s[:16]
         # Add purchase time to database
         with sqlite3.connect(db_path) as db:
-            db.execute(f"UPDATE orders SET purchase_time = ? WHERE time = '{date[0]}'", (time,))
+            db_data = [time, chemical, amount, unit, date]
+            print(db_data)
+            db.execute("UPDATE orders SET purchase_time = ? WHERE chemical = ? AND amount = ? AND unit = ? AND time = ?", db_data)
             data = db.execute("SELECT * FROM orders ORDER BY time DESC")
             return render_template("purchase_database.html", orders = data)
 
@@ -129,5 +131,64 @@ def sds():
         cas = request.form.get("cas")
         find_sds.find_sds([cas])
         return send_from_directory(filepath, (cas + '-SDS.pdf'))
+    
+    
+@app.route('/stock', methods = ["GET", "POST"])
+def stock():
+    if request.method == "GET":
+        return render_template("stock.html")
+    else:     
+        with sqlite3.connect(db_path) as db:
+            chemical = request.form.get("chemical").title()
+            # Gets unit required to analyse stock for chemical
+            units = db.execute(f"SELECT unit FROM orders WHERE chemical = ? GROUP BY unit", (chemical,))       
+            # Fetchall converts from object to list     
+            unit = units.fetchall()[0][0]
+            
+            # If units = mL, or L, retrive associated numbers and add together (accounting for unit conversion)
+            if unit == "mL" or unit == "L":
+                # If chemical still on buy request form but not purchased, do not add to total stock
+                mL = db.execute("SELECT SUM(amount) FROM orders WHERE chemical = ? AND unit = 'mL' AND NOT purchase_time = 'None' ", (chemical,)).fetchall()[0][0]
+                L = db.execute("SELECT SUM(amount) FROM orders WHERE chemical = ? AND unit = 'L' AND NOT purchase_time = 'None' ", (chemical,)).fetchall()[0][0]
+                # Get total volume of chemical accounting for ML or L == None
+                print(mL , L)
+                if mL == None:
+                    total = f"{L} L"
+                elif L == None:
+                    total = f"{(mL/1000)} L"  
+                else:
+                    total = f"{(mL/1000) + L} L"
+                
+                return render_template("stock_details.html", chemical=chemical, total=total)
+            
+            else:
+                # If chemical still on buy request form but not purchased, do not add to total stock. Fetchall converts from object to list
+                mg = db.execute("SELECT SUM(amount) FROM orders WHERE chemical = ? AND unit = 'mg' AND NOT purchase_time = 'None' ", (chemical,)).fetchall()[0][0]
+                g = db.execute("SELECT SUM(amount) FROM orders WHERE chemical = ? AND unit = 'g' AND NOT purchase_time = 'None' ", (chemical,)).fetchall()[0][0]
+                Kg = db.execute("SELECT SUM(amount) FROM orders WHERE chemical = ? AND unit = 'Kg' AND NOT purchase_time = 'None' ", (chemical,)).fetchall()[0][0]
+                
+                # Make list of above variables
+                units = [mg, g, Kg]
+                # Loop through units
+                print(units)
+                
+                '''Remove None from list using filter(),
+                   Lambda function returns True if unit != None.
+                   If True returned from lambda funciton then unit added into list 'units', else removed from list '''
+                units = list(filter(lambda unit: unit != None, units))
+                
+                # Declare total = 0
+                num_total = 0
+                # loop though remainig units (i.e. not None units) and add up, accounting for unit conversions
+                for unit in units:
+                    if unit == Kg: 
+                        num_total += (unit * 1000)
+                    elif unit == g: 
+                        num_total += unit
+                    elif unit == mg: 
+                        num_total += (unit / 1000)
+                total = f"{num_total} g"
+                        
+                return render_template("stock_details.html", chemical=chemical, total=total)
 
         

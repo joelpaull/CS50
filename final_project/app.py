@@ -131,8 +131,19 @@ def search_details():
         time = s[:16]
         
         with sqlite3.connect(db_path) as db:
-            data = [chemical, cas_number, time]
-            db.execute("INSERT INTO Chemicals (name, cas, time) VALUES(?, ?, ?)", data)
+            # Retrieve chemicals currently in database
+            chem_list = (db.execute("SELECT name FROM Chemicals")).fetchall()
+            in_database = False       
+        
+            # Loop through, if chemical found in database, in_database = True
+            for chem in chem_list:
+                if chemical == chem[0]:
+                    in_database = True
+                    return render_template("error.html", message = "Chemical Already in Database")
+                    
+            if not in_database:
+                data = [chemical, cas_number, time]
+                db.execute("INSERT INTO Chemicals (name, cas, time) VALUES(?, ?, ?)", data)
         return redirect("/cas_database")
     
 @app.route('/cas_database')

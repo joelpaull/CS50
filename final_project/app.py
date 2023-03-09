@@ -26,7 +26,6 @@ def get_stock(chemical):
         
         # Get unit required to analyse stock for chemical, fetch all converts from object to list     
         units = db.execute(f"SELECT unit FROM orders WHERE chemical = ? GROUP BY unit", (chemical,)).fetchall()
-        print(units)
         # If no units found from database, assumption made that stock = 0 as no matching chemical in database
         if units == []:
             return "Chemical Not Found"       
@@ -40,7 +39,6 @@ def get_stock(chemical):
             L = db.execute("SELECT SUM(amount) FROM orders WHERE chemical = ? AND unit = 'L' AND NOT purchase_time = 'None' ", (chemical,)).fetchall()[0][0]
             
             # Get total volume of chemical accounting for ML or L == None
-            print(mL , L)
             if mL == None:
                 total = f"{L} L"
             elif L == None:
@@ -131,7 +129,6 @@ def search_details():
         now = datetime.now()
         s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
         time = s[:16]
-        print(chemical)
         
         with sqlite3.connect(db_path) as db:
             data = [chemical, cas_number, time]
@@ -170,7 +167,6 @@ def buy():
         # Add buy order to database
         with sqlite3.connect(db_path) as db:
             data = (chemical, amount, unit, time, priority)
-            print(data)
             db.execute("INSERT INTO orders (chemical, amount, unit, time, priority) VALUES (?, ?, ?, ?, ?)", data)
         return redirect("/purchase_database")
         
@@ -192,7 +188,6 @@ def purchase():
         amount = request.form.get("amount")
         unit = request.form.get("unit")
         date = request.form.get("date")
-        print(chemical, amount, unit, date)
         
         # Get current time 
         now = datetime.now()
@@ -202,7 +197,6 @@ def purchase():
         # Add purchase time to database
         with sqlite3.connect(db_path) as db:
             db_data = [time, chemical, amount, unit, date]
-            print(db_data)
             db.execute("UPDATE orders SET purchase_time = ? WHERE chemical = ? AND amount = ? AND unit = ? AND time = ?", db_data)
             data = db.execute("SELECT * FROM orders WHERE amount > 0 ORDER BY time DESC")
             return render_template("purchase_database.html", orders = data)
@@ -241,13 +235,17 @@ def stock():
         if not request.form.get("chemical"):
             return render_template("error.html", message = "Please Input Chemical Name")
         
-        # Check if name is not numerical
-        if not request.form.get("chemical").isalpha():
+        # Check if name is numerical
+        if request.form.get("chemical").isnumeric():
             return render_template("error.html", message = "Chemical Name Cannot Be Numerical")
         
         # Check total stock of chemical from form
         chemical = request.form.get("chemical").title()
         total = get_stock(chemical)
+        
+        # If order placed via buy request but purchase not yet fulfilled will produce NoneError
+        if 'None' in total:
+            total = 'None Yet Purchased'
         return render_template("stock_details.html", chemical=chemical, total=total)
 
 @app.route("/stock_removal", methods = ["GET", "POST"])
@@ -279,7 +277,21 @@ def remove():
         for chem in chem_list:
             if chemical == chem[0]:
                 in_database = True
-                db.execute("INSERT INTO orders (chemical, amount, unit, time, priority, purchase_time) VALUES (?, ?, ?, ?, ?, ?)", data)
+                
+                # Get current stock in database, removing with .strip()
+                current_stock = float(get_stock(chemical).strip("g").strip("L").strip())
+           
+                # Account for unit conversaions (work in g or L)
+                if unit == "Kg":
+                    current_stock = current_stock * 1000
+                elif unit == "mL" or unit == "mg":
+                    current_stock = current_stock * 1000
+
+                # If current stock is greater than removal amount, then proceed with removal
+                if current_stock >= float(amount):
+                    db.execute("INSERT INTO orders (chemical, amount, unit, time, priority, purchase_time) VALUES (?, ?, ?, ?, ?, ?)", data)
+                else:
+                    return render_template("error.html", message = f"Not Enough {chemical} in Stock to Remove {amount} {unit}")
     
     # If not found in database return error
     if not in_database:

@@ -1,0 +1,160 @@
+.container_center {
+    text-align: center;
+    padding: 15%;
+    color: White;
+    font-size:60px
+}
+
+.form {
+  position: absolute;
+    top: 100px;
+    left: 50px;
+}
+
+.container_contact_me {
+  text-align: center;
+  padding: 15%;
+  color: orange;
+  font-size: medium
+}
+.container_left {
+    text-align: left;
+    padding: 20%;
+    color: orange;
+    font-size:20px
+}
+
+.h1 {
+    font-size:150px;
+    font-family:Andale Mono, monospace;
+}
+
+.body{
+    font-size:18px;
+    font-family: Andale Mono;
+    color: orange;
+}
+  body {
+        background: linear-gradient(to right, grey, black);
+
+  }
+.photo {
+    position: absolute;
+    top: 0px;
+    left: 0px;}
+
+.education-title {
+    color: orange;
+    font-family:Andale Mono, monospace;
+    font-size:40px;
+}
+.education-location {
+    color: orange;
+    font-family:Andale Mono, monospace;
+    font-size:20px;
+    padding-left: 20px
+}
+
+.education {
+    color: white;
+    font-family:Andale Mono, monospace;
+    font-size:25px;
+    padding-top: 10px
+}
+.education-level{
+    font-family:Andale Mono, monospace;
+    font-size:50px;
+    padding-top: 40px
+}
+
+.split {
+    height: 10%;
+    width: 50%;
+    position: fixed;
+    padding-top: 20px;
+  }
+
+  .left {
+    left: 0;
+    padding-top: 40px;
+    padding-left: 250px
+  }
+
+  .right {
+    right:0;
+    padding-top: 40px;
+    padding-left: 130px;
+  }
+  .right_contact_me {
+    right:0;
+    padding-top: 170px;
+    padding-left: 200px;
+    width:900px
+  }
+
+  .far-right {
+    right:0px;
+    top:160px;
+    padding-left: 250px;
+  }
+
+  .logo{
+    padding-top: 30px;
+    padding-left:15px
+  }
+  .logo_git{
+    position: absolute;
+    bottom: 100px;
+    right: 515px;
+    z-index:4
+  }
+  .logo_css{
+    padding-top: 30px;
+    padding-left:22px
+  }
+  .logo_js{
+    padding-top: 30px;
+  }
+
+  .column {
+    float: left;
+    width: 10%;
+  }
+  .column_contact_me {
+    float: left;
+    width: 50%;
+
+  }
+
+  .row_after {
+    padding-top:50px;
+    content: "";
+    clear: both;
+    display: table;
+  }
+
+  .contact-details {
+    color: orange;
+    font-family:Andale Mono, monospace;
+    font-size:30px;
+    padding-left: 20px;
+}
+
+.contact {
+    color: white;
+    font-family:Andale Mono, monospace;
+    font-size:40px;
+    padding-top: 50px}
+
+.button{
+  color:orange
+}
+
+.button:hover{
+  color:white
+}
+
+.center {
+  margin-left: auto;
+  margin-right: auto;
+}

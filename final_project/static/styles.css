@@ -102,3 +102,17 @@ nav .navbar-brand
     margin-left: 0px;
     width:200px;
 }
+
+/* Error Message config */
+.error {
+    text-align: center;
+    color:#ee544c;
+    font-size: 60px;
+    margin-top:100px
+}
+.error_message {
+    text-align: center;
+    color:#5891e2;
+    font-size: 40px;
+    margin-top:20px
+}

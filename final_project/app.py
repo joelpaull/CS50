@@ -3,6 +3,7 @@ from flask_session import Session
 from pip._vendor import requests
 import sqlite3
 import os.path
+from os import path
 from datetime import datetime
 from find_sds.find_sds import find_sds
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -24,8 +25,12 @@ def get_stock(chemical):
     with sqlite3.connect(db_path) as db:
         
         # Get unit required to analyse stock for chemical, fetch all converts from object to list     
-        units = db.execute(f"SELECT unit FROM orders WHERE chemical = ? GROUP BY unit", (chemical,))       
-        unit = units.fetchall()[0][0]
+        units = db.execute(f"SELECT unit FROM orders WHERE chemical = ? GROUP BY unit", (chemical,)).fetchall()
+        print(units)
+        # If no units found from database, assumption made that stock = 0 as no matching chemical in database
+        if units == []:
+            return "Chemical Not Found"       
+        unit = units[0][0]
         
         # If units = mL, or L, retrive associated numbers and add together (accounting for unit conversion)
         if unit == "mL" or unit == "L":
@@ -84,6 +89,8 @@ def find_cas(chemical):
     response_api = requests.get(url = URL, params = parameters)
     response_api.raise_for_status()
     data = response_api.json()
+    if data["count"] == 0:
+        return 0
     # Return CAS (RN) number
     return(data["results"][0]['rn'])
 
@@ -98,10 +105,15 @@ def search():
     if request.method == "GET":
         return render_template("search.html")
     else:
+        # Check input added to chemical search, if yes continue with query
+        if not request.form.get("chemical"):
+            return render_template("error.html", message = "Please Ensure You Input Chemical Name")
         chemical = request.form.get("chemical")
         
         # API call to get CAS number from chemical name
         cas_number = find_cas(chemical)
+        if cas_number == 0:
+            return render_template("error.html", message = "Chemical Not Found")
         
         # Show details of search result
         return render_template("search_details.html", chemical = chemical.title(), cas_number = cas_number)
@@ -139,17 +151,23 @@ def buy():
     if request.method == "GET":
         return render_template("buy.html")
     else:
-        # Add buy orders to database
+        
+        # If any data missing return error
+        if not request.form.get("chemical") or not request.form.get("amount") or not request.form.get("unit") or not request.form.get("priority"):
+            return render_template("error.html", message = "Please Ensure All Relevant Purchase Data is Added")
+        
+        # Add form values to variables
         chemical = request.form.get("chemical").title()
         amount = request.form.get("amount")
         unit = request.form.get("unit")
+        priority = request.form.get("priority").title()
         
         # Strip decimals from time, (first convert to str)
         now = datetime.now()
         s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
         time = s[:16]
         
-        priority = request.form.get("priority").title()
+        # Add buy order to database
         with sqlite3.connect(db_path) as db:
             data = (chemical, amount, unit, time, priority)
             print(data)
@@ -194,11 +212,24 @@ def sds():
     if request.method == "GET":
         return render_template("sds.html")
     else:
+        # Ensure cas number was submitted
+        if not request.form.get("cas"):
+            return render_template("error.html", message = "Please Ensure You Input a Valid CAS Number")
+        
         # Call find SDS function from Sub Module
         filepath = "/Users/joelpaull/cs50/CS50/final_project/find_sds/find_sds/SDS"
         cas = request.form.get("cas")
+        
+        # Ensure cas number is not letters
+        if cas.isalpha():
+            return render_template("error.html", message = "Please Enter a Numerical CAS Number")
         find_sds.find_sds([cas])
-        return send_from_directory(filepath, (cas + '-SDS.pdf'))
+        
+        # Check in pdf location to see if SDS has been found, return pdf if found, error if not found
+        if path.exists(f"{filepath}/{cas}-SDS.pdf"):
+            return send_from_directory(filepath, (cas + "-SDS.pdf"))
+        else:
+            return render_template("error.html", message = "SDS Not Found. Please Check CAS Number")
     
     
 @app.route('/stock', methods = ["GET", "POST"])
@@ -206,28 +237,57 @@ def stock():
     if request.method == "GET":
         return render_template("stock.html")
     else:     
+        # Check if chemical input added to form
+        if not request.form.get("chemical"):
+            return render_template("error.html", message = "Please Input Chemical Name")
+        
+        # Check if name is not numerical
+        if not request.form.get("chemical").isalpha():
+            return render_template("error.html", message = "Chemical Name Cannot Be Numerical")
+        
+        # Check total stock of chemical from form
         chemical = request.form.get("chemical").title()
         total = get_stock(chemical)
         return render_template("stock_details.html", chemical=chemical, total=total)
 
 @app.route("/stock_removal", methods = ["GET", "POST"])
 def remove():
-        # Minus chemical from database
-        chemical = request.form.get("chemical").title()
-        amount = int(request.form.get("amount"))
-        unit = request.form.get("unit")
+    # Check that all variables are supplied in form
+    if not request.form.get("chemical") or not request.form.get("amount") or not request.form.get("unit"):
+        return render_template("error.html", message = "Please Input All Values To Remove Item")
+    
+    # Minus chemical from database
+    chemical = request.form.get("chemical").title()
+    amount = int(request.form.get("amount"))
+    unit = request.form.get("unit")
+
+    # Strip decimals from time, (first convert to str)
+    now = datetime.now()
+    s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
+    time = s[:16]
+
+    # When adding data to database amount * -1 removes amount from stock counting algorithm
+    with sqlite3.connect(db_path) as db:
+        data = (chemical, amount * -1, unit, time, "-", time)
         
-        # Strip decimals from time, (first convert to str)
-        now = datetime.now()
-        s = now.strftime('%Y-%m-%d %H:%M:%S.%f')
-        time = s[:16]
+        # Retrieve all chemicals in current database, fetch all converts to str
+        chem_list = (db.execute("SELECT name FROM Chemicals")).fetchall()
         
-        # When adding data to database amount * -1 removes amount from stock counting algorithm
-        with sqlite3.connect(db_path) as db:
-            data = (chemical, amount * -1, unit, time, "-", time)
-            db.execute("INSERT INTO orders (chemical, amount, unit, time, priority, purchase_time) VALUES (?, ?, ?, ?, ?, ?)", data)
-        total = get_stock(chemical)
-        return render_template("stock_details.html", chemical=chemical, total = total)
+        in_database = False       
+        
+        # Loop through if chemical found in database, in_database = True
+        for chem in chem_list:
+            if chemical == chem[0]:
+                in_database = True
+                db.execute("INSERT INTO orders (chemical, amount, unit, time, priority, purchase_time) VALUES (?, ?, ?, ?, ?, ?)", data)
+    
+    # If not found in database return error
+    if not in_database:
+        return render_template("error.html", message = "Chemical Not Found in Current Stock")
+    
+    # Get new stock count and show stock details
+    total = get_stock(chemical)
+    return render_template("stock_details.html", chemical=chemical, total = total)
     
 @app.route("/removal_data")
 def removal_data():
@@ -236,9 +296,5 @@ def removal_data():
         data = db.execute("SELECT * FROM orders WHERE amount < 0 ORDER BY time DESC")
         return render_template("stock_removal.html", orders = data)
 
-@app.route("/error")
-def error(message):
-    return render_template(message)
-    
     
         

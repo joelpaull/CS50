@@ -36,17 +36,28 @@ nav .navbar-brand
     background-color:red
   }
 
-  .button_sds_database{
+.button_sds_database{
     background-color:orange;
     color: white;
     border: none;
   }  
 
-  .button_sds_database:hover{
+.button_sds_database:hover{
     background-color:red;
     color: white;
   }
   
+.remove_button{
+    background-color:orange;
+    border: none;
+    position: absolute;
+    margin-top: 120px;
+    margin-right: 350px;
+    width:150px;
+  }  
+  .remove_button:hover{
+    background-color:red
+  }
 /* search_details config */
 
 .search {

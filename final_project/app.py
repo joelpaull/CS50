@@ -56,23 +56,16 @@ def get_stock(chemical):
             
             # Make list of above variables
             units = [mg, g, Kg]
-          
-            '''Remove None from list using filter(),
-                Lambda function returns True if unit != None.
-                If True returned from lambda funciton then unit added into list 'units', else removed from list '''
-            units = list(filter(lambda unit: unit != None, units))
-            
-            # Declare total = 0
             num_total = 0
             
-            # loop though remainig units (i.e. not None units) and add up, accounting for unit conversions
-            for unit in units:
-                if unit == Kg: 
-                    num_total += (unit * 1000)
-                elif unit == g: 
-                    num_total += unit
-                elif unit == mg: 
-                    num_total += (unit / 1000)
+            # if unit has value, add to total value
+            if mg != None:
+                num_total += mg /1000
+            if g != None:
+                num_total += g
+            if Kg != None:
+                num_total += Kg *1000
+            
             total = f"{num_total} g"
             return total
 
@@ -132,14 +125,23 @@ def search_details():
         
         with sqlite3.connect(db_path) as db:
             # Retrieve chemicals currently in database
-            chem_list = (db.execute("SELECT name FROM Chemicals")).fetchall()
+            chem_list = (db.execute("SELECT * FROM Chemicals")).fetchall()
+            print(chem_list)
             in_database = False       
         
-            # Loop through, if chemical found in database, in_database = True
+            # Loop through names, if chemical found in database, in_database = True
             for chem in chem_list:
                 if chemical == chem[0]:
                     in_database = True
                     return render_template("error.html", message = "Chemical Already in Database")
+            
+            # Loop through cas, if chemical found in database, in_database = True 
+            # (for if someone trys to add same chemical under a different name)
+            for chem in chem_list:
+                if cas_number == chem[1]:
+                    name = chem[0]
+                    in_database = True
+                    return render_template("error.html", message = f"Chemical Already in Database Under '{name}'")
                     
             if not in_database:
                 data = [chemical, cas_number, time]
@@ -157,7 +159,9 @@ def cas_database():
 @app.route('/buy', methods=["GET", "POST"])
 def buy():
     if request.method == "GET":
-        return render_template("buy.html")
+        with sqlite3.connect(db_path) as db:
+            chemicals = db.execute("SELECT name from Chemicals ORDER BY name ASC")
+        return render_template("buy.html", chemicals=chemicals)
     else:
         
         # If any data missing return error
@@ -239,8 +243,11 @@ def sds():
     
 @app.route('/stock', methods = ["GET", "POST"])
 def stock():
+    
     if request.method == "GET":
-        return render_template("stock.html")
+        with sqlite3.connect(db_path) as db:
+            chemicals = db.execute("SELECT name from Chemicals ORDER BY name ASC")
+        return render_template("stock.html", chemicals=chemicals)
     else:     
         # Check if chemical input added to form
         if not request.form.get("chemical"):
@@ -254,10 +261,9 @@ def stock():
         chemical = request.form.get("chemical").title()
         total = get_stock(chemical)
         
-        # If order placed via buy request but purchase not yet fulfilled will produce NoneError
-        if 'None' in total:
-            total = 'None Yet Purchased'
-        return render_template("stock_details.html", chemical=chemical, total=total)
+        with sqlite3.connect(db_path) as db:
+            chemicals = db.execute("SELECT name from Chemicals ORDER BY name ASC")
+        return render_template("stock_details.html", chemical=chemical, total=total, chemicals=chemicals)
 
 @app.route("/stock_removal", methods = ["GET", "POST"])
 def remove():

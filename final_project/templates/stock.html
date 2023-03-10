@@ -7,12 +7,26 @@
 {% block main %}
     <form action="/stock" method="post">
         <div>
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto mt-5" id="chemical" name="chemical" placeholder="Chemical Name" type="text">
+            <!-- Loop through stock in CAS database-->
+            <select class="form-select mx-auto w-auto mt-5"name = "chemical">
+                <option disabled selected> Chemical</option>
+                {% for chem in chemicals %}
+                <option value = '{{chem[0]}}' >{{chem[0]}}</option>
+                {% endfor %}
+            </select>
         <button class="btn button btn-primary mt-3" type="submit">Search Stock</button>
     </form>
     <form action="/stock_removal" method="post" class="buy_request justify-content-center justify-axis-center">
         <div class="buy_request justify-content-center justify-axis-center">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto mt-5" id="chemical" name="chemical" placeholder="Chemical" type="text">
+
+            <!-- Loop through stock in CAS database-->
+            <select class="form-select drop-list"name = "chemical">
+                <option disabled selected> Chemical</option>
+                {% for chem in chemicals %}
+                <option value = '{{chem[0]}}' >{{chem[0]}}</option>
+                {% endfor %}
+            </select>
+
             <input autocomplete="off" class="form-control mx-auto w-auto mt-5" id="amount" name="amount" placeholder="Amount" type="number">
             <select class="form-select select_tab" id="unit" name="unit">
                 <option selected disabled>Unit</option>

@@ -2,19 +2,27 @@
 
 {% block title %}
     Buy Request
-{% endblock %}
+    {% endblock %}
 
 {% block main %}
     <form action="/buy" method="post" class="buy_request justify-content-center justify-axis-center">
         <div class="buy_request justify-content-center justify-axis-center">
-            <input autocomplete="off" autofocus class="form-control mx-auto w-auto mt-5" id="chemical" name="chemical" placeholder="Chemical" type="text">
+
+            <!-- Loop through chems in CAS database-->
+            <select class="form-select drop-list"name = "chemical">
+                <option disabled selected> Chemical</option>
+                {% for chem in chemicals %}
+                <option value = '{{chem[0]}}' >{{chem[0]}}</option>
+                {% endfor %}
+            </select>
+            
             <input autocomplete="off" class="form-control mx-auto w-auto mt-5" id="amount" name="amount" placeholder="Amount" type="number">
             <select class="form-select select_tab" id="unit" name="unit">
                 <option selected disabled>Unit</option>
                 <option value="mL">mL</option>
                 <option value="L">L</option>
                 <option value="mg">mg</option>
-                <option value="L">g</option>
+                <option value="g">g</option>
                 <option value="Kg">Kg</option>
             </select>
             <select class="form-select priority_tab" id="priority" name="priority">

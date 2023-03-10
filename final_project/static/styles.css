@@ -116,3 +116,10 @@ nav .navbar-brand
     font-size: 40px;
     margin-top:20px
 }
+
+/* drop-down config */
+.drop-list {
+  height: 40px;
+  align-self:last baseline;
+  width: 200px;
+}

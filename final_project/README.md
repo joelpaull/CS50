@@ -12,3 +12,6 @@ Secondly, you can make stock buy requests for any chemical in the CAS database, 
 Thirdly, the app provides a comprehensive stock management system. After the managerial staff purchases any stock, it is added to the chemical's overall stock count, which is derived from a SQL database query. The app includes a function to deduct the relevant amount of stock from the stock database upon using up an 'amount' of any stock, and the running total is updated. The overall stock can be searched and viewed at any time. The app can handle unit conversions in the backend for you, making it convenient to purchase or remove stock using appropriate units.
 
 The databases that can be viewed in the application include the CAS Registry database, Order Log Database, and Stock Removal Log Database. This app is a comprehensive solution to manage and track chemicals in any laboratory. 
+
+
+Tech stack used in creation of this project: Python, Flask, SQL, html, CSS, Javascript, Bootstrap, jinja templating tools.

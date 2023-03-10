@@ -1,12 +1,10 @@
-from flask import Flask, redirect, render_template, request, session, send_from_directory
-from flask_session import Session
+from flask import Flask, redirect, render_template, request, send_from_directory
 from pip._vendor import requests
 import sqlite3
 import os.path
 from os import path
 from datetime import datetime
 from find_sds.find_sds import find_sds
-from werkzeug.security import check_password_hash, generate_password_hash
 
 URL = "https://commonchemistry.cas.org/api/search?"
 
@@ -105,7 +103,6 @@ def search():
         cas_number = find_cas(chemical)
         if cas_number == 0:
             return render_template("error.html", message = "Chemical Not Found")
-        
         # Show details of search result
         return render_template("search_details.html", chemical = chemical.title(), cas_number = cas_number)
 
@@ -262,8 +259,9 @@ def stock():
         total = get_stock(chemical)
         
         with sqlite3.connect(db_path) as db:
-            chemicals = db.execute("SELECT name from Chemicals ORDER BY name ASC")
-        return render_template("stock_details.html", chemical=chemical, total=total, chemicals=chemicals)
+            chemical_list = db.execute("SELECT name from Chemicals ORDER BY name ASC")
+            
+        return render_template("stock_details.html", chemical=chemical, total=total, chemicals=chemical_list, chemical_1 = chemical_list)
 
 @app.route("/stock_removal", methods = ["GET", "POST"])
 def remove():

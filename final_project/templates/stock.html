@@ -7,7 +7,7 @@
 {% block main %}
     <form action="/stock" method="post">
         <div>
-            <!-- Loop through stock in CAS database-->
+            <!-- Loop through chem in CAS database-->
             <select class="form-select mx-auto w-auto mt-5"name = "chemical">
                 <option disabled selected> Chemical</option>
                 {% for chem in chemicals %}
@@ -19,14 +19,8 @@
     <form action="/stock_removal" method="post" class="buy_request justify-content-center justify-axis-center">
         <div class="buy_request justify-content-center justify-axis-center">
 
-            <!-- Loop through stock in CAS database-->
-            <select class="form-select drop-list"name = "chemical">
-                <option disabled selected> Chemical</option>
-                {% for chem in chemicals %}
-                <option value = '{{chem[0]}}' >{{chem[0]}}</option>
-                {% endfor %}
-            </select>
-
+            <!-- Loop through chem in CAS database-->
+            <input autocomplete="off" class="form-control mx-auto w-auto mt-5" id="chemical" name="chemical" placeholder="Chemical Name" type="text">
             <input autocomplete="off" class="form-control mx-auto w-auto mt-5" id="amount" name="amount" placeholder="Amount" type="number">
             <select class="form-select select_tab" id="unit" name="unit">
                 <option selected disabled>Unit</option>

@@ -1,5 +1,6 @@
 # ChemIndex
-#### Video Demo:  <URL HERE>
+#### Video Demo:  https://youtu.be/QKbW_OlpfEs
+
 #### Description:
   
 Welcome to this chemical management app designed for academic and commercial laboratories. This app has three main functions.
